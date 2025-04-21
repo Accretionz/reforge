@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import supabase from "@/utils/supabase/supabaseClient";
 
 export default function HomeDashboard() {
-  const [jobs, setJobs] = useState([]);
+  const [jobs, setJobs] = useState<any[]>([]);
   const router = useRouter();
   const [points, setPoints] = useState<number | null>(null);
 
