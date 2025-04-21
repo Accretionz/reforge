@@ -3,6 +3,16 @@
 import createClient from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 
+interface FormData {
+  job_title: string;
+  company_name: string;
+  location: string;
+  applied_date: string; // Use Date if it's a Date object
+  application_url: string;
+  salary: number | string; // Use number if it's always a number
+  user_id: string;
+}
+
 export const getAllPost = async () => {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -19,7 +29,7 @@ export const getAllPost = async () => {
   return data;
 };
 
-export const createPost = async (prev, formData) => {
+export const createPost = async (formData: FormData) => {
   const supabase = await createClient();
 
   
