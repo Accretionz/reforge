@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { getAllPost, getUserEmail, getUserPoints } from "@/actions/post";
+import { getUserEmail, getUserPoints } from "@/actions/post";
 import { useRouter } from "next/navigation";
 import supabase from "@/utils/supabase/supabaseClient";
 
@@ -11,7 +11,7 @@ export default function HomeDashboard() {
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data, error } = await supabase.auth.getSession();
+      const { data } = await supabase.auth.getSession();
       if (!data.session) router.push("/Login");
     };
 
@@ -36,7 +36,7 @@ export default function HomeDashboard() {
 
     fetchJobs();
     fetchUserPoints();
-  }, []);
+  }, [router]);
 
   return (
     <div className="max-w-7xl mx-auto w-full p-8 text-white">
