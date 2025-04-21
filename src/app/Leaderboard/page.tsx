@@ -32,7 +32,7 @@ async function fetchUsers() {
 }
 
 const Leaderboard = () => {
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<{ email: string; jobCount: number }[]>([]);
   const router = useRouter();
 
   useEffect(() => {
