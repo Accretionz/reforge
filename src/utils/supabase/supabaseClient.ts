@@ -11,4 +11,5 @@ const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export { supabase, supabaseAdmin }; 
+export { supabase, supabaseAdmin };
+export default supabase; 
