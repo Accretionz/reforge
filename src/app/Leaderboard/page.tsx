@@ -7,7 +7,9 @@ async function fetchUsers() {
   try {
     const { data, error } = await supabaseAdmin.from("profile").select(`
         email,
-        jobs:jobs(count) // Fetch the count of jobs submitted by each user
+        jobs (
+          id
+        )
       `);
 
     if (error) {
@@ -18,7 +20,7 @@ async function fetchUsers() {
     // Map the data to include the job count
     const usersWithJobCount = data.map((user) => ({
       email: user.email,
-      jobCount: user.jobs[0]?.count || 0,
+      jobCount: user.jobs ? user.jobs.length : 0, // Count the number of jobs
     }));
 
     // Sort users by job count in descending order
