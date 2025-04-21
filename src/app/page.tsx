@@ -4,8 +4,21 @@ import { getUserEmail, getUserPoints } from "@/actions/post";
 import { useRouter } from "next/navigation";
 import supabase from "@/utils/supabase/supabaseClient";
 
+type Job = {
+  id: string;
+  created_at: string;
+  job_title: string;
+  company_name: string;
+  location: string;
+  applied_date: string;
+  application_url: string;
+  salary: number;
+  user_id: string;
+  status: string;
+};
+
 export default function HomeDashboard() {
-  const [jobs, setJobs] = useState<any[]>([]);
+  const [jobs, setJobs] = useState<Job[]>([]);
   const router = useRouter();
   const [points, setPoints] = useState<number | null>(null);
 
@@ -23,7 +36,7 @@ export default function HomeDashboard() {
         .from("jobs")
         .select("*")
         .eq("user_id", user?.id);
-      setJobs(data || []);
+      setJobs((data as Job[]) || []);
     };
 
     const fetchUserPoints = async () => {
