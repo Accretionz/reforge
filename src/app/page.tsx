@@ -56,7 +56,7 @@ export default function HomeDashboard() {
       <>
         <div className="w-11/12 mx-auto bg-[#181818] rounded-3xl p-10 text-center mb-[25px]">
           <h1 className="text-6xl font-bold text-white mt-5 mb-5 w-3/4 mx-auto flex items-center justify-center">
-            Job Synthesis
+            Reforge
           </h1>
           <p className="text-xl text-white mb-7 w-3/4 mx-auto">
             It only takes one yes. So keep going until you get it.
@@ -136,7 +136,7 @@ export default function HomeDashboard() {
           <div className="bg-[#181818] bg-opacity-90 rounded-3xl p-8">
             <h2 className="text-white text-xl font-medium mb-2">Leaderboard</h2>
             <p className="text-5xl font-bold text-white mb-1">?</p>
-            <p className="text-gray-400 mb-6">Requests Submitted</p>
+            <p className="text-gray-400 mb-6">Position</p>
             <button
               className="border-2 border-white text-white font-medium py-2 px-6 rounded-full inline-flex items-center cursor-pointer"
               onClick={() => router.push("/Leaderboard")}
@@ -160,11 +160,11 @@ export default function HomeDashboard() {
           </div>
 
           <div className="bg-[#181818] bg-opacity-90 rounded-3xl p-8">
-            <h2 className="text-white text-xl font-medium mb-2">Casino</h2>
-            <p className="text-5xl font-bold text-white mb-1">$2,500</p>
-            <p className="text-gray-400 mb-6">points earned</p>
+            <h2 className="text-white text-xl font-medium mb-2">Chests</h2>
+            <p className="text-5xl font-bold text-white mb-1">0</p>
+            <p className="text-gray-400 mb-6">Opened</p>
             <button className="border-2 border-white text-white font-medium py-2 px-6 rounded-full inline-flex items-center cursor-pointer">
-              Go to Casino
+              Open Chests
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-4 w-4 ml-2"
