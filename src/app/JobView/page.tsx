@@ -121,35 +121,20 @@ export default function JobView() {
       return;
     }
 
-    const { data: profile, error: profileError } = await supabase
-      .from("profile")
-      .select("points")
-      .eq("email", user.email)
-      .single();
+    // Refetch jobs for the logged-in user
+    const { data, error } = await supabase
+      .from("jobs")
+      .select("*")
+      .eq("user_id", user.id);
 
-    if (profileError) {
-      console.error("Error fetching user points:", profileError.message);
-      alert("Failed to fetch user points.");
+    if (error) {
+      console.error("Error fetching jobs:", error.message);
+      alert("Failed to fetch updated jobs.");
       return;
     }
 
-    const currentPoints = profile?.points || 0;
-    const updatedPoints = currentPoints + 100;
-
-    const { error: pointsError } = await supabase
-      .from("profile")
-      .update({ points: updatedPoints })
-      .eq("email", user.email);
-
-    if (pointsError) {
-      console.error("Error updating points:", pointsError.message);
-      alert("Failed to update user points.");
-      return;
-    }
-
-    const data: Job[] = await getAllPost();
-    setJobs(data);
-    setFilteredJobs(data);
+    setJobs(data || []);
+    setFilteredJobs(data || []);
     closeModal();
 
     alert("Job submitted successfully! You earned 100 points.");
