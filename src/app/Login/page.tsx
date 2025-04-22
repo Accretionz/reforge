@@ -42,10 +42,7 @@ export default function LoginPage() {
                   brand: "#22c55e", // Green for buttons
                   brandAccent: "#16a34a", // Darker green for hover
                 },
-                radii: {
-                  input: "6px", // Slightly rounded input fields
-                  button: "6px", // Slightly rounded buttons
-                },
+
                 space: {
                   inputPadding: "12px", // Add padding inside inputs
                   buttonPadding: "12px 16px", // Add padding inside buttons
