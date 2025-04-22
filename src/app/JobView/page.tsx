@@ -41,13 +41,32 @@ export default function JobView() {
 
   useEffect(() => {
     const fetchJobs = async () => {
-      const data: Job[] = await getAllPost();
-      setJobs(data);
-      setFilteredJobs(data);
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        alert("You must be logged in to view your job applications.");
+        router.push("/Login");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("jobs")
+        .select("*")
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error("Error fetching jobs:", error.message);
+        return;
+      }
+
+      setJobs(data || []);
+      setFilteredJobs(data || []);
     };
 
     fetchJobs();
-  }, []);
+  }, [router]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
