@@ -17,18 +17,22 @@ type Job = {
   status: string;
 };
 
+type LeaderboardUser = {
+  email: string;
+  jobCount: number;
+};
+
 export default function HomeDashboard() {
   const [jobs, setJobs] = useState<Job[]>([]);
-  const router = useRouter();
   const [points, setPoints] = useState<number | null>(null);
+  const [position, setPosition] = useState<number | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
       if (!data.session) router.push("/Login");
     };
-
-    checkSession();
 
     const fetchJobs = async () => {
       const user = (await supabase.auth.getUser()).data.user;
@@ -47,8 +51,44 @@ export default function HomeDashboard() {
       }
     };
 
+    const fetchLeaderboardPosition = async () => {
+      const email = await getUserEmail();
+      if (!email) return;
+
+      const { data, error } = await supabase.from("profile").select(`
+          email,
+          jobs (
+            id,
+            created_at
+          )
+        `);
+
+      if (error) {
+        console.error("Error fetching leaderboard data:", error);
+        return;
+      }
+
+      // Calculate job counts for each user
+      const leaderboard: LeaderboardUser[] = data.map((user) => ({
+        email: user.email,
+        jobCount: user.jobs.length,
+      }));
+
+      // Sort leaderboard by job count in descending order
+      leaderboard.sort((a, b) => b.jobCount - a.jobCount);
+
+      // Find the user's position
+      const userPosition = leaderboard.findIndex(
+        (user) => user.email === email
+      );
+
+      setPosition(userPosition !== -1 ? userPosition + 1 : null); // Convert to 1-based index
+    };
+
+    checkSession();
     fetchJobs();
     fetchUserPoints();
+    fetchLeaderboardPosition();
   }, [router]);
 
   return (
@@ -135,7 +175,9 @@ export default function HomeDashboard() {
           {/* Total Tasks */}
           <div className="bg-[#181818] bg-opacity-90 rounded-3xl p-8">
             <h2 className="text-white text-xl font-medium mb-2">Leaderboard</h2>
-            <p className="text-5xl font-bold text-white mb-1">?</p>
+            <p className="text-5xl font-bold text-white mb-1">
+              {position !== null ? `#${position}` : "Loading..."}
+            </p>
             <p className="text-gray-400 mb-6">Position</p>
             <button
               className="border-2 border-white text-white font-medium py-2 px-6 rounded-full inline-flex items-center cursor-pointer"

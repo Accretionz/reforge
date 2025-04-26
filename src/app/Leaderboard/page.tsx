@@ -3,12 +3,21 @@ import React, { useEffect, useState } from "react";
 import supabaseAdmin from "@/utils/supabase/supabaseClient";
 import { useRouter } from "next/navigation";
 
-async function fetchUsers() {
+async function fetchUsers(timeRange: "week" | "all") {
   try {
+    const now = new Date();
+    let fromDate = null;
+
+    if (timeRange === "week") {
+      fromDate = new Date();
+      fromDate.setDate(now.getDate() - 7); // Get date 7 days ago
+    }
+
     const { data, error } = await supabaseAdmin.from("profile").select(`
         email,
         jobs (
-          id
+          id,
+          created_at
         )
       `);
 
@@ -17,11 +26,17 @@ async function fetchUsers() {
       return [];
     }
 
-    // Map the data to include the job count
-    const usersWithJobCount = data.map((user) => ({
-      email: user.email,
-      jobCount: user.jobs ? user.jobs.length : 0, // Count the number of jobs
-    }));
+    // Filter jobs based on the time range
+    const usersWithJobCount = data.map((user) => {
+      const filteredJobs = fromDate
+        ? user.jobs.filter((job) => new Date(job.created_at) >= fromDate)
+        : user.jobs;
+
+      return {
+        email: user.email,
+        jobCount: filteredJobs ? filteredJobs.length : 0, // Count the number of jobs
+      };
+    });
 
     // Sort users by job count in descending order
     return usersWithJobCount.sort((a, b) => b.jobCount - a.jobCount);
@@ -33,15 +48,16 @@ async function fetchUsers() {
 
 const Leaderboard = () => {
   const [users, setUsers] = useState<{ email: string; jobCount: number }[]>([]);
+  const [timeRange, setTimeRange] = useState<"week" | "all">("all");
   const router = useRouter();
 
   useEffect(() => {
     const getUsers = async () => {
-      const fetchedUsers = await fetchUsers();
+      const fetchedUsers = await fetchUsers(timeRange);
       setUsers(fetchedUsers);
     };
     getUsers();
-  }, []);
+  }, [timeRange]);
 
   return (
     <div
@@ -79,6 +95,37 @@ const Leaderboard = () => {
       >
         Home
       </button>
+      <div style={{ textAlign: "center", marginBottom: "20px" }}>
+        <button
+          onClick={() => setTimeRange("week")}
+          style={{
+            marginRight: "10px",
+            padding: "10px 20px",
+            fontSize: "16px",
+            backgroundColor: timeRange === "week" ? "#4CAF50" : "#f0f0f0",
+            color: timeRange === "week" ? "#fff" : "#333",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+        >
+          Past Week
+        </button>
+        <button
+          onClick={() => setTimeRange("all")}
+          style={{
+            padding: "10px 20px",
+            fontSize: "16px",
+            backgroundColor: timeRange === "all" ? "#4CAF50" : "#f0f0f0",
+            color: timeRange === "all" ? "#fff" : "#333",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+        >
+          All Time
+        </button>
+      </div>
       <ul style={{ listStyleType: "none", padding: 0 }}>
         {users.map((user, index) => (
           <li

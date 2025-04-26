@@ -104,6 +104,7 @@ export default function JobView() {
       return;
     }
 
+    // Insert the new job
     const { error: jobError } = await supabase.from("jobs").insert({
       job_title,
       company_name,
@@ -117,6 +118,33 @@ export default function JobView() {
     if (jobError) {
       console.error("Error saving job:", jobError.message);
       alert("Failed to save job.");
+      return;
+    }
+
+    // Fetch the current points
+    const { data: userData, error: fetchError } = await supabase
+      .from("profile")
+      .select("points")
+      .eq("id", user.id)
+      .single();
+
+    if (fetchError) {
+      console.error("Error fetching user points:", fetchError.message);
+      alert("Failed to fetch user points.");
+      return;
+    }
+
+    const newPoints = (userData?.points || 0) + 100;
+
+    // Update the user's points
+    const { error: pointsError } = await supabase
+      .from("profile")
+      .update({ points: newPoints })
+      .eq("id", user.id);
+
+    if (pointsError) {
+      console.error("Error updating points:", pointsError.message);
+      alert("Failed to update points.");
       return;
     }
 
