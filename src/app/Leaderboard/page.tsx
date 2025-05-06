@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 
 async function fetchUsers(timeRange: "week" | "all") {
   try {
-    const now = new Date();
     let fromDate = null;
 
     if (timeRange === "week") {
