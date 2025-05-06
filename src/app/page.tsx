@@ -55,6 +55,13 @@ export default function HomeDashboard() {
       const email = await getUserEmail();
       if (!email) return;
 
+      const now = new Date();
+      const dayOfWeek = now.getDay(); // Get the current day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+      const daysSinceMonday = (dayOfWeek + 6) % 7; // Calculate days since the last Monday
+      const fromDate = new Date();
+      fromDate.setDate(fromDate.getDate() - daysSinceMonday); // Set the date to the most recent Monday
+      fromDate.setHours(0, 0, 0, 0); // Reset time to the start of the day
+
       const { data, error } = await supabase.from("profile").select(`
           email,
           jobs (
@@ -68,11 +75,17 @@ export default function HomeDashboard() {
         return;
       }
 
-      // Calculate job counts for each user
-      const leaderboard: LeaderboardUser[] = data.map((user) => ({
-        email: user.email,
-        jobCount: user.jobs.length,
-      }));
+      // Calculate job counts for each user for the current week
+      const leaderboard: LeaderboardUser[] = data.map((user) => {
+        const weeklyJobs = user.jobs.filter(
+          (job) => new Date(job.created_at) >= fromDate
+        );
+
+        return {
+          email: user.email,
+          jobCount: weeklyJobs.length,
+        };
+      });
 
       // Sort leaderboard by job count in descending order
       leaderboard.sort((a, b) => b.jobCount - a.jobCount);

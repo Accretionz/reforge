@@ -10,7 +10,10 @@ async function fetchUsers(timeRange: "week" | "all") {
 
     if (timeRange === "week") {
       fromDate = new Date();
-      fromDate.setDate(now.getDate() - 7); // Get date 7 days ago
+      const dayOfWeek = fromDate.getDay(); // Get the current day of the week (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+      const daysSinceMonday = (dayOfWeek + 6) % 7; // Calculate days since the last Monday
+      fromDate.setDate(fromDate.getDate() - daysSinceMonday); // Set the date to the most recent Monday
+      fromDate.setHours(0, 0, 0, 0); // Reset time to the start of the day
     }
 
     const { data, error } = await supabaseAdmin.from("profile").select(`
@@ -48,7 +51,7 @@ async function fetchUsers(timeRange: "week" | "all") {
 
 const Leaderboard = () => {
   const [users, setUsers] = useState<{ email: string; jobCount: number }[]>([]);
-  const [timeRange, setTimeRange] = useState<"week" | "all">("all");
+  const [timeRange, setTimeRange] = useState<"week" | "all">("week"); // Default to "week"
   const router = useRouter();
 
   useEffect(() => {
