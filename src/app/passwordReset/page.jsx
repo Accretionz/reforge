@@ -1,11 +1,30 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import supabase from "@/utils/supabase/supabaseClient";
 
 export default function PasswordResetPage() {
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [sessionChecked, setSessionChecked] = useState(false);
+
+  useEffect(() => {
+    // Wait for Supabase to pick up the session from the URL
+    const checkSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        setStatus({
+          type: "error",
+          message:
+            "No valid password reset session found. Please use the link from your email.",
+        });
+      }
+      setSessionChecked(true);
+    };
+    checkSession();
+  }, []);
 
   const handlePasswordReset = async (e) => {
     e.preventDefault();
@@ -23,6 +42,14 @@ export default function PasswordResetPage() {
     }
     setLoading(false);
   };
+
+  if (!sessionChecked) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-900">
+        <div className="text-white text-lg">Checking reset session...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-900 via-slate-900 to-slate-800 px-4">
