@@ -314,7 +314,7 @@ export default function JobView() {
     <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="w-full bg-slate-800 text-white px-6 py-4 shadow mb-5">
-        <div className="flex justify-between items-center max-w-8xl mx-auto">
+        <div className="flex justify-between items-center max-w-7xl mx-auto">
           <div
             className="flex items-center cursor-pointer ml-10"
             onClick={() => router.push("/home")}

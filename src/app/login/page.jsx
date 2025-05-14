@@ -48,6 +48,12 @@ export default function LoginPage() {
                 },
               },
             },
+            // style: {
+            //   // Hide the built-in forgot password link
+            //   anchor: {
+            //     display: "none",
+            //   },
+            // },
           }}
           theme="dark"
           providers={["google"]}
