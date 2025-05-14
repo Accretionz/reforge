@@ -108,12 +108,15 @@ export default function JobView() {
 
       // Fetch all users and their jobs
       const { data, error } = await supabase.from("profile").select(`
-          email,
-          jobs (
-            id,
-            created_at
-          )
-        `);
+        id,
+        email,
+        sapphire,
+        last_sapphire_award,
+        jobs (
+          id,
+          created_at
+        )
+      `);
 
       if (error) {
         console.error("Error fetching leaderboard data:", error.message);
@@ -127,8 +130,11 @@ export default function JobView() {
         );
 
         return {
+          id: profile.id,
           email: profile.email,
           jobCount: weeklyJobs.length,
+          sapphire: profile.sapphire || 0,
+          last_sapphire_award: profile.last_sapphire_award,
         };
       });
 
@@ -146,6 +152,26 @@ export default function JobView() {
 
       setWeeklyLeaderboard(weekly);
       setOverallLeaderboard(overall);
+
+      // Only run on Monday
+      if (now.getDay() === 1 && weekly.length > 0) {
+        const topUser = weekly[0];
+        // Only award if not already awarded this week
+        const thisMonday = new Date(fromDate); // already set to this week's Monday
+        const lastAward = topUser.last_sapphire_award
+          ? new Date(topUser.last_sapphire_award)
+          : null;
+        if (!lastAward || lastAward < thisMonday) {
+          // Award sapphire
+          await supabase
+            .from("profile")
+            .update({
+              sapphire: (topUser.sapphire || 0) + 1,
+              last_sapphire_award: thisMonday.toISOString(),
+            })
+            .eq("id", topUser.id);
+        }
+      }
     } catch (err) {
       console.error("Error in fetchLeaderboardData:", err);
     }

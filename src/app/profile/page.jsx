@@ -5,12 +5,14 @@ import {
   getUserPoints,
   getUserMissions,
   getUserDiamonds,
+  getUserSapphire,
 } from "@/actions/post";
 
 export default function ProfilePage() {
   const [email, setEmail] = useState("");
   const [points, setPoints] = useState(0);
-  const [diamonds, setDiamonds] = useState(0); // <-- add diamonds state
+  const [diamonds, setDiamonds] = useState(0);
+  const [sapphire, setSapphire] = useState(0);
   const [missions, setMissions] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -21,9 +23,11 @@ export default function ProfilePage() {
       const userPoints = await getUserPoints(userEmail);
       setPoints(userPoints);
 
-      // Fetch diamonds from profile table
       const diamond = await getUserDiamonds(userEmail);
       setDiamonds(diamond || 0);
+
+      const sapphire = await getUserSapphire(userEmail);
+      setSapphire(sapphire || 0);
 
       const userMissions = await getUserMissions(userEmail);
       setMissions(userMissions);
@@ -70,6 +74,29 @@ export default function ProfilePage() {
             <span className="text-yellow-700 font-bold text-lg">
               {diamonds}
             </span>
+          </div>
+          {/* Sapphire display */}
+          <div className="w-full flex justify-between items-center bg-blue-100 rounded-lg px-4 py-3 mb-2">
+            <span className="text-blue-700 font-medium flex items-center">
+              <svg
+                className="w-5 h-5 mr-1 inline"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <circle cx="10" cy="10" r="8" fill="#38bdf8" />
+                <text
+                  x="10"
+                  y="15"
+                  textAnchor="middle"
+                  fontSize="10"
+                  fill="white"
+                >
+                  S
+                </text>
+              </svg>
+              Sapphire
+            </span>
+            <span className="text-blue-700 font-bold text-lg">{sapphire}</span>
           </div>
         </div>
         {/* Missions Section */}

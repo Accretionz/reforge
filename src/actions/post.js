@@ -168,3 +168,17 @@ export const getUserDiamonds = async (userEmail) => {
   }
   return profile?.diamond || 0;
 };
+
+export const getUserSapphire = async (userEmail) => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("profile")
+    .select("sapphire")
+    .eq("email", userEmail)
+    .single();
+  if (error) {
+    console.error("Error fetching sapphire:", error);
+    return 0;
+  }
+  return data?.sapphire || 0;
+};
