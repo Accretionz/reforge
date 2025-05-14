@@ -39,13 +39,12 @@ export default function LoginPage() {
             variables: {
               default: {
                 colors: {
-                  brand: "#22c55e", // Green for buttons
-                  brandAccent: "#16a34a", // Darker green for hover
+                  brand: "#22c55e",
+                  brandAccent: "#16a34a",
                 },
-
                 space: {
-                  inputPadding: "12px", // Add padding inside inputs
-                  buttonPadding: "12px 16px", // Add padding inside buttons
+                  inputPadding: "12px",
+                  buttonPadding: "12px 16px",
                 },
               },
             },
@@ -53,6 +52,14 @@ export default function LoginPage() {
           theme="dark"
           providers={["google"]}
         />
+        <div className="mt-4 text-center">
+          <a
+            href="/forgetPassword"
+            className="text-blue-400 hover:underline text-sm"
+          >
+            Forgot your password?
+          </a>
+        </div>
       </div>
     </div>
   );
