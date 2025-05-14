@@ -80,24 +80,23 @@ const JobStatusChart = ({ jobs }) => {
       <div className="h-44">
         <Pie data={data} options={options} />
       </div>
-
       {/* Custom legend */}
-      <div className="mt-3 flex justify-center items-center space-x-4 text-sm">
+      <div className="mt-3 mx-auto max-w-full w-fit flex justify-center items-center space-x-6 text-xs flex-nowrap overflow-x-auto">
         <div className="flex items-center text-black">
-          <span className="inline-block w-3 h-3 bg-blue-500 rounded-full mr-1.5"></span>
+          <span className="inline-block w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
           <span>
             Applied: <span className="font-medium">{statusCounts.applied}</span>
           </span>
         </div>
         <div className="flex items-center text-black">
-          <span className="inline-block w-3 h-3 bg-green-400 rounded-full mr-1.5"></span>
+          <span className="inline-block w-3 h-3 bg-green-400 rounded-full mr-2"></span>
           <span>
             Accepted:{" "}
             <span className="font-medium">{statusCounts.accepted}</span>
           </span>
         </div>
         <div className="flex items-center text-black">
-          <span className="inline-block w-3 h-3 bg-red-400 rounded-full mr-1.5"></span>
+          <span className="inline-block w-3 h-3 bg-red-400 rounded-full mr-2"></span>
           <span>
             Rejected:{" "}
             <span className="font-medium">{statusCounts.rejected}</span>

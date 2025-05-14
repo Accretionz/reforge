@@ -2,6 +2,7 @@
 
 import createClient from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { startOfWeek, isBefore } from "date-fns";
 
 export const getAllPost = async () => {
   const supabase = await createClient();
@@ -81,4 +82,89 @@ export const getUserEmail = async () => {
   }
 
   return user?.email || null;
+};
+
+export const getUserMissions = async (userEmail) => {
+  const supabase = await createClient();
+
+  // Use 'id' instead of 'user_id'
+  const { data: profile, error: profileError } = await supabase
+    .from("profile")
+    .select("id")
+    .eq("email", userEmail)
+    .single();
+
+  if (profileError || !profile?.id) {
+    console.error("Error fetching user id for missions:", profileError);
+    return [];
+  }
+
+  const now = new Date();
+  const thisMonday = startOfWeek(now, { weekStartsOn: 1 }); // 1 = Monday
+
+  // If last_reset is before this Monday, reset missions
+  if (!profile.last_reset || isBefore(new Date(profile.last_reset), thisMonday)) {
+    // Reset user missions here (set progress to 0, completed to false, etc.)
+    await supabase
+      .from("user_missions")
+      .update({ progress: 0, completed: false, completed_at: null })
+      .eq("user_id", profile.id);
+
+    // Update last_reset to this Monday
+    await supabase
+      .from("profile")
+      .update({ last_reset: thisMonday.toISOString() })
+      .eq("id", profile.id);
+  }
+
+  // Now, fetch user missions joined with missions table
+  const { data, error } = await supabase
+    .from("user_missions")
+    .select(`
+      id,
+      mission_id,
+      progress,
+      completed,
+      completed_at,
+      missions (
+        description,
+        target,
+        reward_points,
+        reward_item
+      )
+    `)
+    .eq("user_id", profile.id);
+
+  if (error) {
+    console.error("Error fetching user missions:", error);
+    return [];
+  }
+
+  // Flatten the missions data for easier use in the frontend
+  return data.map((um) => ({
+    id: um.id,
+    mission_id: um.mission_id,
+    progress: um.progress,
+    completed: um.completed,
+    completed_at: um.completed_at,
+    description: um.missions?.description,
+    target: um.missions?.target,
+    reward_points: um.missions?.reward_points,
+    reward_item: um.missions?.reward_item,
+  }));
+};
+
+export const getUserDiamonds = async (userEmail) => {
+  const supabase = await createClient();
+  const { data: profile, error } = await supabase
+    .from("profile")
+    .select("diamond")
+    .eq("email", userEmail)
+    .single();
+
+  if (error) {
+    console.error("Error fetching user diamonds:", error);
+    return 0;
+  }
+  return profile?.diamond || 0;
 };

@@ -29,6 +29,7 @@ export default function JobView() {
 
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const profileMenuRef = useRef();
+  const [sortOrder, setSortOrder] = useState("recent");
 
   const router = useRouter();
 
@@ -150,6 +151,93 @@ export default function JobView() {
     }
   };
 
+  const updateMissionsAfterJobSubmit = async (userId) => {
+    // Get all active user_missions for this user
+    const { data: userMissions, error: missionsError } = await supabase
+      .from("user_missions")
+      .select(
+        `
+    id,
+    progress,
+    completed,
+    missions (
+      type,
+      target,
+      reward_points,
+      reward_item
+    )
+  `
+      )
+      .eq("user_id", userId)
+      .eq("completed", false);
+
+    if (missionsError) {
+      console.error("Error fetching user missions:", missionsError.message);
+      return;
+    }
+
+    for (const um of userMissions) {
+      const newProgress = (um.progress || 0) + 1;
+      const isCompleted = newProgress >= (um.missions?.target || 1);
+
+      // Update mission progress and completion
+      const { error: updateError } = await supabase
+        .from("user_missions")
+        .update({
+          progress: newProgress,
+          completed: isCompleted,
+          completed_at: isCompleted ? new Date().toISOString() : null,
+        })
+        .eq("id", um.id);
+
+      if (updateError) {
+        console.error("Error updating mission progress:", updateError.message);
+        continue;
+      }
+
+      // If just completed, award reward points
+      if (isCompleted && um.missions?.reward_points > 0) {
+        // Fetch current points
+        const { data: userData, error: fetchError } = await supabase
+          .from("profile")
+          .select("points")
+          .eq("id", userId)
+          .single();
+
+        if (!fetchError) {
+          const newPoints =
+            (userData?.points || 0) + (um.missions.reward_points || 0);
+          await supabase
+            .from("profile")
+            .update({ points: newPoints })
+            .eq("id", userId);
+        }
+      }
+
+      // If weekly mission is completed and reward_item is 'diamond', increment diamond count
+      if (
+        isCompleted &&
+        um.missions?.type === "weekly" &&
+        um.missions?.reward_item === "diamond"
+      ) {
+        // Fetch current diamond count
+        const { data: userData, error: diamondError } = await supabase
+          .from("profile")
+          .select("diamond")
+          .eq("id", userId)
+          .single();
+
+        if (!diamondError) {
+          const newDiamonds = (userData?.diamond || 0) + 1;
+          await supabase
+            .from("profile")
+            .update({ diamond: newDiamonds })
+            .eq("id", userId);
+        }
+      }
+    }
+  };
+
   useEffect(() => {
     const loadData = async () => {
       await fetchJobs();
@@ -228,6 +316,8 @@ export default function JobView() {
       return;
     }
 
+    await updateMissionsAfterJobSubmit(user.id);
+
     // Refresh data after submission
     fetchJobs();
     fetchLeaderboardData();
@@ -297,7 +387,7 @@ export default function JobView() {
   };
 
   useEffect(() => {
-    const filtered = jobs.filter((job) => {
+    let filtered = jobs.filter((job) => {
       const matchesSearchQuery = job.company_name
         .toLowerCase()
         .includes(searchQuery);
@@ -307,16 +397,26 @@ export default function JobView() {
       return matchesSearchQuery && matchesStatus;
     });
 
+    filtered = filtered.sort((a, b) => {
+      const dateA = new Date(a.applied_date);
+      const dateB = new Date(b.applied_date);
+      if (sortOrder === "recent") {
+        return dateB - dateA; // Most recent first
+      } else {
+        return dateA - dateB; // Oldest first
+      }
+    });
+
     setFilteredJobs(filtered);
-  }, [jobs, searchQuery, statusFilter]);
+  }, [jobs, searchQuery, statusFilter, sortOrder]);
 
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="w-full bg-slate-800 text-white px-6 py-4 shadow mb-5">
-        <div className="flex justify-between items-center max-w-7xl mx-auto">
+      <header className="w-full bg-slate-800 text-white py-4 shadow mb-5">
+        <div className="flex justify-between items-center max-w-8xl mx-auto px-10">
           <div
-            className="flex items-center cursor-pointer ml-10"
+            className="flex items-center cursor-pointer"
             onClick={() => router.push("/home")}
           >
             <img
@@ -326,7 +426,7 @@ export default function JobView() {
             />
             <h1 className="text-xl font-bold px-2">Reforge</h1>
           </div>
-          <div className="relative mr-10" ref={profileMenuRef}>
+          <div className="relative " ref={profileMenuRef}>
             <button
               className="flex items-center focus:outline-none cursor-pointer"
               onClick={() => setShowProfileMenu((v) => !v)}
@@ -364,7 +464,7 @@ export default function JobView() {
           {/* Left Sidebar */}
           <div className="col-span-1">
             {/* Search Container */}
-            <div className="bg-gray-100 p-4 rounded shadow ml-7 mb-4">
+            <div className="bg-gray-100 p-4 rounded shadow  mb-4">
               <div className="relative">
                 <input
                   type="text"
@@ -398,7 +498,7 @@ export default function JobView() {
             </div>
 
             {/* Chart Container - Separate from search */}
-            <div className="bg-gray-100 p-4 rounded shadow ml-7 mb-4">
+            <div className="bg-gray-100 p-4 rounded shadow  mb-4">
               <h3 className="text-gray-700 font-medium mb-3 text-center">
                 Job Status Overview
               </h3>
@@ -406,7 +506,7 @@ export default function JobView() {
             </div>
 
             {/* Leaderboard Widget */}
-            <div className="bg-gray-100 p-4 rounded shadow ml-7">
+            <div className="bg-gray-100 p-4 rounded shadow ">
               <LeaderboardWidget
                 weeklyLeaderboard={weeklyLeaderboard}
                 overallLeaderboard={overallLeaderboard}
@@ -419,7 +519,8 @@ export default function JobView() {
           <main className="col-span-3">
             <div className="bg-slate-800 p-4 rounded-lg shadow mb-4 flex justify-between items-center">
               <div className="flex items-center space-x-4">
-                <div className="relative min-w-[180px]">
+                {/* Status Filter */}
+                <div className="relative min-w-[150px]">
                   <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
@@ -440,11 +541,49 @@ export default function JobView() {
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
                     <svg
-                      className="fill-current h-4 w-4"
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      viewBox="0 0 24 24"
                       xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
                     >
-                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                {/* Sort By Dropdown */}
+                <div className="relative min-w-[150px]">
+                  <select
+                    value={sortOrder}
+                    onChange={(e) => setSortOrder(e.target.value)}
+                    className="appearance-none bg-transparent border border-gray-300 rounded px-4 py-2 text-white pr-8 w-full focus:outline-none"
+                  >
+                    <option value="recent" className="bg-gray-800 text-white">
+                      Most Recent
+                    </option>
+                    <option value="oldest" className="bg-gray-800 text-white">
+                      Oldest
+                    </option>
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M19 9l-7 7-7-7"
+                      />
                     </svg>
                   </div>
                 </div>
