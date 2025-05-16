@@ -30,7 +30,7 @@ export default function JobModal({
       <ModalContent className="max-h-[90vh] w-full max-w-md md:max-w-lg overflow-y-auto border border-gray-600 rounded-lg">
         {() => (
           <>
-            <ModalHeader className="flex flex-col gap-1 py-3 text-center">
+            <ModalHeader className="flex flex-col gap-1 py-3 text-center text-white">
               Add a Job Application
             </ModalHeader>
             <ModalBody className="py-2">
@@ -42,7 +42,7 @@ export default function JobModal({
                 <div className="flex flex-col gap-1">
                   <label
                     htmlFor="job_title"
-                    className="text-sm font-medium text-left"
+                    className="text-sm font-medium text-left text-white"
                   >
                     Job Title
                   </label>
@@ -68,9 +68,11 @@ export default function JobModal({
                   />
                 </div>
 
-                {/* Repeat the pattern for other fields with reduced gap and sm size */}
                 <div className="flex flex-col gap-1">
-                  <label htmlFor="company_name" className="text-sm font-medium">
+                  <label
+                    htmlFor="company_name"
+                    className="text-sm font-medium text-white"
+                  >
                     Company Name
                   </label>
                   <Input
@@ -95,9 +97,11 @@ export default function JobModal({
                   />
                 </div>
 
-                {/* ...other fields with same pattern... */}
                 <div className="flex flex-col gap-1">
-                  <label htmlFor="location" className="text-sm font-medium">
+                  <label
+                    htmlFor="location"
+                    className="text-sm font-medium text-white"
+                  >
                     Location
                   </label>
                   <Input
@@ -122,7 +126,10 @@ export default function JobModal({
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label htmlFor="applied_date" className="text-sm font-medium">
+                  <label
+                    htmlFor="applied_date"
+                    className="text-sm font-medium text-white"
+                  >
                     Applied Date
                   </label>
                   <Input
@@ -150,7 +157,7 @@ export default function JobModal({
                 <div className="flex flex-col gap-1">
                   <label
                     htmlFor="application_url"
-                    className="text-sm font-medium"
+                    className="text-sm font-medium text-white"
                   >
                     Application URL
                   </label>
@@ -176,7 +183,10 @@ export default function JobModal({
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label htmlFor="salary" className="text-sm font-medium">
+                  <label
+                    htmlFor="salary"
+                    className="text-sm text-white font-medium"
+                  >
                     Salary
                   </label>
                   <Input
@@ -208,7 +218,7 @@ export default function JobModal({
                 variant="flat"
                 onPress={onClose}
                 size="sm"
-                className="border rounded-2xl border-white/30"
+                className="text-white border rounded-2xl border-white/30"
               >
                 Cancel
               </Button>
@@ -216,7 +226,7 @@ export default function JobModal({
                 color="primary"
                 onPress={onSubmit}
                 size="sm"
-                className="border rounded-2xl border-white/30"
+                className="text-white border rounded-2xl border-white/30"
               >
                 Submit
               </Button>
