@@ -87,10 +87,10 @@ export const getUserEmail = async () => {
 export const getUserMissions = async (userEmail) => {
   const supabase = await createClient();
 
-  // Use 'id' instead of 'user_id'
+  // Select both id and last_reset
   const { data: profile, error: profileError } = await supabase
     .from("profile")
-    .select("id")
+    .select("id, last_reset")
     .eq("email", userEmail)
     .single();
 
@@ -139,6 +139,8 @@ export const getUserMissions = async (userEmail) => {
     console.error("Error fetching user missions:", error);
     return [];
   }
+
+  console.log("getUserMissions result:", data);
 
   // Flatten the missions data for easier use in the frontend
   return data.map((um) => ({

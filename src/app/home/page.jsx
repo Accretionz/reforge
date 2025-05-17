@@ -197,6 +197,8 @@ export default function JobView() {
       .eq("user_id", userId)
       .eq("completed", false);
 
+    console.log("Fetched user missions:", userMissions);
+
     if (missionsError) {
       console.error("Error fetching user missions:", missionsError.message);
       return;
